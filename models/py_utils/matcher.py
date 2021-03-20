@@ -14,12 +14,10 @@ class HungarianMatcher(nn.Module):
     there are more predictions than targets. In this case, we do a 1-to-1 matching of the best predictions,
     while the others are un-matched (and thus treated as non-objects).
     """
-
     def __init__(self, cost_class: float = 1,
                  curves_weight: float = 1, lower_weight: float = 1, upper_weight: float = 1):
         """Creates the matcher
         """
-
         super().__init__()
         self.cost_class = cost_class
         threshold = 15 / 720.
