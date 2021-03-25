@@ -101,7 +101,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     # print(type(sample_data)) # function
 
     # allocating resources for parallel reading
-    training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)
+    training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)       #读取数据。8
     if val_iter:
         validation_tasks = init_parallel_jobs([validation_db], validation_queue, sample_data)
 
@@ -148,14 +148,15 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
 
     with stdout_to_tqdm() as save_stdout:
         for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1),
-                                                      file=save_stdout, ncols=67),
-                                                 print_freq=10, header=header):
-
+                                                      file=save_stdout, ncols=67), print_freq=10, header=header):
             training = pinned_training_queue.get(block=True)
             viz_split = 'train'
             save = True if (display and iteration % display == 0) else False
             (set_loss, loss_dict) \
                 = nnet.train(iteration, save, viz_split, **training)
+            #training的数据。。
+
+
             (loss_dict_reduced, loss_dict_reduced_unscaled, loss_dict_reduced_scaled, loss_value) = loss_dict
             metric_logger.update(loss=loss_value, **loss_dict_reduced_scaled, **loss_dict_reduced_unscaled)
             metric_logger.update(class_error=loss_dict_reduced['class_error'])

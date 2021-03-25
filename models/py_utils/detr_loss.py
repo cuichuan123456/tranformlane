@@ -22,6 +22,7 @@ class SetCriterion(nn.Module):
             eos_coef: relative classification weight applied to the no-object category
             losses: list of all the losses to be applied. See get_loss for list of available losses.
         """
+
         super().__init__()
         self.num_classes = num_classes
         self.matcher = matcher

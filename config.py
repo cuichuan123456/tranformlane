@@ -38,7 +38,6 @@ class Config:
         self._configs["val_split"]   = "minival"
         self._configs["test_split"]  = "testdev"
 
-
         # Rng
         self._configs["data_rng"] = np.random.RandomState(123)
         self._configs["nnet_rng"] = np.random.RandomState(317)
@@ -47,7 +46,7 @@ class Config:
         self._configs["res_layers"] = [2, 2, 2, 2]
         self._configs["res_dims"] = [64, 128, 256, 512]
         self._configs["res_strides"] = [1, 2, 2, 2]
-        self._configs["attn_dim"] = 64
+        self._configs["attn_dim"] = 256
         self._configs["dim_feedforward"] = 4 * 64
 
         self._configs["drop_out"] = 0.1
