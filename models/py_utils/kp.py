@@ -16,7 +16,6 @@ from sample.vis import save_debug_images_boxes
 
 BN_MOMENTUM = 0.1
 
-
 ##########################
 class BackboneBase(nn.Module):
 
@@ -71,13 +70,8 @@ class Joiner(nn.Sequential):
         for x in out:
             pos.append(self[1](x).to(x.tensors.dtype))
         return out, pos
-def build_backbone(args):
-    position_embedding = build_position_encoding(args)
-    train_backbone = args.lr_backbone > 0
-    return_interm_layers = args.masks or (args.num_feature_levels > 1)
-    backbone = Backbone(args.backbone, train_backbone, return_interm_layers, args.dilation)
-    model = Joiner(backbone, position_embedding)
-    return model
+
+
 
 
 ##################################3
@@ -196,7 +190,16 @@ class kp(nn.Module):
         self.flag = flag
         # above all waste not used
         self.norm_layer = norm_layer
-
+######################################################
+        def build_backbone():
+            position_embedding = build_position_encoding(hidden_dim,'v2')
+            train_backbone =2e-5
+            return_interm_layers = True              #args.masks or (args.num_feature_levels > 1)
+            backbone = Backbone('resnet50', train_backbone, return_interm_layers, dilation=False)
+            model = Joiner(backbone, position_embedding)   #这个位置传入参数的时候可能出错。。
+            return model
+        self.backbone=build_backbone()
+####################################################################
         self.inplanes = res_dims[0]
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = self.norm_layer(self.inplanes)
@@ -239,29 +242,56 @@ class kp(nn.Module):
         return nn.Sequential(*layers)
 
     def _train(self, *xs, **kwargs):  # 这个是主train。。。
-        images = xs[0]  # B 3 360 640
-        masks = xs[1]  # B 1 360 640
+        # images = xs[0]  # B 3 360 640
+        # masks = xs[1]  # B 1 360 640
 
-        p = self.conv1(images)  # B 16 180 320
-        p = self.bn1(p)  # B 16 180 320
-        p = self.relu(p)  # B 16 180 320
-        p = self.maxpool(p)  # B 16 90 160
-        p = self.layer1(p)  # B 16 90 160
-        p = self.layer2(p)  # B 32 45 80
-        p = self.layer3(p)  # B 64 23 40
-        p = self.layer4(p)  # B 128 12 20
-        pmasks = F.interpolate(masks[:, 0, :, :][None], size=p.shape[-2:]).to(torch.bool)[0]
-        pos = self.position_embedding(p, pmasks)  #单尺度。。
-        ###############################################################3
-        self.input_proj = nn.ModuleList([
-            nn.Sequential(
-                nn.Conv2d(backbone.num_channels[0], hidden_dim, kernel_size=1),
-                nn.GroupNorm(32, hidden_dim),
-            )])
+        # p = self.conv1(images)  # B 16 180 320
+        # p = self.bn1(p)  # B 16 180 320
+        # p = self.relu(p)  # B 16 180 320
+        # p = self.maxpool(p)  # B 16 90 160
+        # p = self.layer1(p)  # B 16 90 160
+        # p = self.layer2(p)  # B 32 45 80
+        # p = self.layer3(p)  # B 64 23 40
+        # p = self.layer4(p)  # B 128 12 20
+        features, pos = self.backbone(xs)
 
+        srcs = []
+        masks = []
+        for l, feat in enumerate(features):
+            src, mask = feat.decompose()
+            srcs.append(self.input_proj[l](src))
+            masks.append(mask)
+            assert mask is not None
+        if self.num_feature_levels > len(srcs):
+            _len_srcs = len(srcs)
+            for l in range(_len_srcs, self.num_feature_levels):
+                if l == _len_srcs:
+                    src = self.input_proj[l](features[-1].tensors)
+                else:
+                    src = self.input_proj[l](srcs[-1])
+                m = xs.mask
+                mask = F.interpolate(m[None].float(), size=src.shape[-2:]).to(torch.bool)[0]
+                pos_l = self.backbone[1](NestedTensor(src, mask)).to(src.dtype)
+                srcs.append(src)
+                masks.append(mask)
+                pos.append(pos_l)
+
+        query_embeds = None
+        if not self.two_stage:
+            query_embeds = self.query_embed.weight
+
+
+        # pmasks = F.interpolate(masks[:, 0, :, :][None], size=p.shape[-2:]).to(torch.bool)[0]
+        # pos = self.position_embedding(p, pmasks)  #单尺度。。
+        # ########################################################################
+        # self.input_proj = nn.ModuleList([
+        #     nn.Sequential(
+        #         nn.Conv2d(backbone.num_channels[0], hidden_dim, kernel_size=1),
+        #         nn.GroupNorm(32, hidden_dim),
+        #     )])
 
         ######################################################################
-        hs = self.transformer(self.input_proj(p), pmasks, pos, self.query_embed.weight)
+        hs = self.transformer(srcs, masks, pos, query_embeds)
 
         #将weight去掉，_
         # 主要修改self.query_embed.weight.
@@ -292,7 +322,6 @@ class kp(nn.Module):
         # as a dict having both a Tensor and a list.
         return [{'pred_logits': a, 'pred_curves': b}
                 for a, b in zip(outputs_class[:-1], outputs_coord[:-1])]
-
 
 class AELoss(nn.Module):
     def __init__(self,

@@ -8,19 +8,16 @@ from models.py_utils.data_parallel import DataParallel
 
 torch.manual_seed(317)
 
-
 class Network(nn.Module):
     def __init__(self, model, loss):
         super(Network, self).__init__()
         self.model = model
         self.loss = loss
 
-    def forward(self, iteration, save, viz_split,
-                xs, ys, **kwargs):
+    def forward(self, iteration, save, viz_split, xs, ys, **kwargs):
         preds = self.model(*xs, **kwargs)
 
         loss = self.loss(iteration, save, viz_split, preds, ys, **kwargs)
-
         # 去掉weight
         return loss
 
