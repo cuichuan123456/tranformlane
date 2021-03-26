@@ -25,7 +25,7 @@
 
         "cache_dir": "./cache",
         "result_dir": "./results",
-        "data_dir": "../../",
+        "data_dir": "/home/ma-user/work/TUSimple",
 
         "res_layers": [1, 2, 2, 2],
         "res_dims": [16, 32, 64, 128],

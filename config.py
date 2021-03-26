@@ -27,7 +27,7 @@ class Config:
         self._configs["use_crop"]          = False
 
         # Directories
-        self._configs["data_dir"]   = "./data"
+        self._configs["data_dir"]   = "/home/ma-user/work/"
         self._configs["cache_dir"] = "./cache"
 
         self._configs["config_dir"] = "./config"
