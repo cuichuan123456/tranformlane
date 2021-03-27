@@ -120,6 +120,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     validation_pin_thread.daemon = True
     validation_pin_thread.start()
 
+
     print("building model...")
     nnet = NetworkFactory(flag=True)
 
@@ -155,7 +156,6 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
             (set_loss, loss_dict) \
                 = nnet.train(iteration, save, viz_split, **training)
             #training的数据。。
-
 
             (loss_dict_reduced, loss_dict_reduced_unscaled, loss_dict_reduced_scaled, loss_value) = loss_dict
             metric_logger.update(loss=loss_value, **loss_dict_reduced_scaled, **loss_dict_reduced_unscaled)
@@ -231,4 +231,6 @@ if __name__ == "__main__":
     print("len of testing db: {}".format(len(validation_db.db_inds)))
 
     print("freeze the pretrained network: {}".format(args.freeze))
+
+
     train(training_dbs, validation_db, args.start_iter, args.freeze) # 0
