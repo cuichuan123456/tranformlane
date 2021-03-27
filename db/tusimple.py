@@ -58,7 +58,7 @@ class TUSIMPLE(DETECTION):
             "val": ['label_data_0531'],
         }[self._split]
 
-        self.root = os.path.join(data_dir, 'TuSimple', 'LaneDetection')
+        self.root = os.path.join(data_dir, 'LaneDetection')
         if self.root is None:
             raise Exception('Please specify the root directory')
         self.img_w, self.img_h = 1280, 720  # tusimple original image resolution
