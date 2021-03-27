@@ -232,5 +232,5 @@ if __name__ == "__main__":
 
     print("freeze the pretrained network: {}".format(args.freeze))
 
-
+#bug
     train(training_dbs, validation_db, args.start_iter, args.freeze) # 0
