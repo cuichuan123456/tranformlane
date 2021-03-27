@@ -57,7 +57,7 @@ class TUSIMPLE(DETECTION):
             "train+val": ['label_data_0313', 'label_data_0601', 'label_data_0531'],
             "val": ['label_data_0531'],
         }[self._split]
-
+   #修改路径
         self.root = os.path.join(data_dir, 'LaneDetection')
         if self.root is None:
             raise Exception('Please specify the root directory')
