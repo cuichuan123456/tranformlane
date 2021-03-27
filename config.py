@@ -6,7 +6,7 @@ class Config:
         self._configs = {}
         self._configs["dataset"] = "TUSimple"
         self._configs["sampling_function"] = "kp_detection"
-
+ #查看push
         # Training Config
         self._configs["display"]           = 5
         self._configs["snapshot"]          = 5000
