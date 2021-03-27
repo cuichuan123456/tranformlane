@@ -4,7 +4,7 @@ import numpy as np
 class Config:
     def __init__(self):
         self._configs = {}
-        self._configs["dataset"] = None
+        self._configs["dataset"] = "TUSimple"
         self._configs["sampling_function"] = "kp_detection"
 
         # Training Config
