@@ -16,7 +16,6 @@ from config import system_configs
 from db.utils.lane import LaneEval
 from db.utils.metric import eval_json
 
-
 RED = (0, 0, 255)
 GREEN = (0, 255, 0)
 BLUE = (255, 0, 0)

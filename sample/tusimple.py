@@ -23,9 +23,7 @@ def kp_detection(db, k_ind):
     gt_lanes = []
 
     db_size = db.db_inds.size # 3268 | 2782
-
     for b_ind in range(batch_size):
-
         if k_ind == 0:
             db.shuffle_inds()
 

@@ -27,9 +27,7 @@ torch.backends.cudnn.benchmark = True
 def parse_args():
     parser = argparse.ArgumentParser(description="Train CornerNet")
     parser.add_argument("cfg_file", help="config file", type=str)
-    parser.add_argument("--iter", dest="start_iter",
-                        help="train at iteration i",
-                        default=0, type=int)
+    parser.add_argument("--iter", dest="start_iter", help="train at iteration i", default=0, type=int)
     parser.add_argument("--threads", dest="threads", default=4, type=int)
     parser.add_argument("--freeze", action="store_true")
 
@@ -54,6 +52,7 @@ def prefetch_data(db, queue, sample_data):
             raise e
 
 def pin_memory(data_queue, pinned_data_queue, sema):
+    #锁页内存，tensor传入GPU比较快。
     while True:
         data = data_queue.get()
 
@@ -99,6 +98,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     data_file   = "sample.{}".format(training_dbs[0].data) # "sample.coco"
     sample_data = importlib.import_module(data_file).sample_data
     # print(type(sample_data)) # function
+
 
     # allocating resources for parallel reading
     training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)       #读取数据。8
@@ -221,7 +221,8 @@ if __name__ == "__main__":
     print("using {} threads".format(threads))
     training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
     validation_db = datasets[dataset](configs["db"], val_split)
-
+    print(training_dbs)
+    print(type(training_dbs))
     # print("system config...")
     # pprint.pprint(system_configs.full)
     #
@@ -230,8 +231,8 @@ if __name__ == "__main__":
 
     print("len of training db: {}".format(len(training_dbs[0].db_inds)))
     print("len of testing db: {}".format(len(validation_db.db_inds)))
-
     print("freeze the pretrained network: {}".format(args.freeze))
 
 #bug
     train(training_dbs, validation_db, args.start_iter, args.freeze) # 0
+ #查看training_dbs的格式  (img, label, idx)。。
