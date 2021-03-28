@@ -24,6 +24,7 @@ import models.py_utils.misc as utils
 torch.backends.cudnn.enabled   = True
 torch.backends.cudnn.benchmark = True
 
+import pdb
 def parse_args():
     parser = argparse.ArgumentParser(description="Train CornerNet")
     parser.add_argument("cfg_file", help="config file", type=str)
@@ -223,17 +224,18 @@ if __name__ == "__main__":
     print("using {} threads".format(threads))
     training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
     validation_db = datasets[dataset](configs["db"], val_split)
+    pdb.set_trace()
     # print(len(training_dbs[1]))
     # print(type(training_dbs[0]))
     # print(type(training_dbs[1]))
-    print("################################")
-    print("system config...")
-    pprint.pprint(system_configs.full)
-
-    print("db config...")
-    pprint.pprint(training_dbs[0].configs)
-    print("################################11111111111")
-    pprint.pprint(training_dbs[1].configs)
+    # print("################################")
+    # print("system config...")
+    # pprint.pprint(system_configs.full)
+    #
+    # print("db config...")
+    # pprint.pprint(training_dbs[0].configs)
+    # print("################################11111111111")
+    # pprint.pprint(training_dbs[1].configs)
 
     print("len of training db: {}".format(len(training_dbs[0].db_inds)))
     print("len of testing db: {}".format(len(validation_db.db_inds)))

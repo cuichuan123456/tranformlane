@@ -57,6 +57,8 @@ class NetworkFactory(object):
         input_test = torch.randn(1, 3, 360, 640).cuda()
         input_mask = torch.randn(1, 3, 360, 640).cuda()
         macs, params, = profile(self.model, inputs=(input_test, input_mask), verbose=False)
+        #此处有bug。。
+
         macs, _ = clever_format([macs, params], "%.3f")
         print('MACs: {}'.format(macs))
 
