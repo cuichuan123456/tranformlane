@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 import json
 import torch
 import numpy as np
@@ -24,7 +24,7 @@ import models.py_utils.misc as utils
 torch.backends.cudnn.enabled   = True
 torch.backends.cudnn.benchmark = True
 
-import pdb
+# import pdb
 def parse_args():
     parser = argparse.ArgumentParser(description="Train CornerNet")
     parser.add_argument("cfg_file", help="config file", type=str)
@@ -121,7 +121,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     validation_pin_thread.daemon = True
     validation_pin_thread.start()
 
-    pdb.set_trace()
+    # pdb.set_trace()
 
     print("building model...")
     nnet = NetworkFactory(flag=True)
@@ -152,10 +152,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     with stdout_to_tqdm() as save_stdout:
         for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1), file=save_stdout, ncols=67), print_freq=10, header=header):
             training = pinned_training_queue.get(block=True)
-            # print(type(training))##
-            # print(len(training))
-            # print("222222222222222222222222222")
-            # print(**training[1])
+
             viz_split = 'train'
             save = True if (display and iteration % display == 0) else False
             (set_loss, loss_dict) \
@@ -225,18 +222,8 @@ if __name__ == "__main__":
     print("using {} threads".format(threads))
     training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
     validation_db = datasets[dataset](configs["db"], val_split)
-    pdb.set_trace()
-    # print(len(training_dbs[1]))
-    # print(type(training_dbs[0]))
-    # print(type(training_dbs[1]))
-    # print("################################")
-    # print("system config...")
-    # pprint.pprint(system_configs.full)
-    #
-    # print("db config...")
-    # pprint.pprint(training_dbs[0].configs)
-    # print("################################11111111111")
-    # pprint.pprint(training_dbs[1].configs)
+    # pdb.set_trace()
+
 
     print("len of training db: {}".format(len(training_dbs[0].db_inds)))
     print("len of testing db: {}".format(len(validation_db.db_inds)))
