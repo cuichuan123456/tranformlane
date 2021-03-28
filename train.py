@@ -229,6 +229,8 @@ if __name__ == "__main__":
 
     print("db config...")
     pprint.pprint(training_dbs[0].configs)
+    print("################################11111111111")
+    pprint.pprint(training_dbs[1].configs)
 
     print("len of training db: {}".format(len(training_dbs[0].db_inds)))
     print("len of testing db: {}".format(len(validation_db.db_inds)))
