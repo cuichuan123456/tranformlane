@@ -151,6 +151,9 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
         for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1), file=save_stdout, ncols=67), print_freq=10, header=header):
             training = pinned_training_queue.get(block=True)
             print(type(training))##
+            print(len(training))
+            print("222222222222222222222222222")
+            print(**training[1])
             viz_split = 'train'
             save = True if (display and iteration % display == 0) else False
             (set_loss, loss_dict) \
