@@ -97,7 +97,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     # load data sampling function
     data_file   = "sample.{}".format(training_dbs[0].data) # "sample.coco"
     sample_data = importlib.import_module(data_file).sample_data
-    print(type(sample_data)) # function
+    print(type(sample_data)) # function 测试1
 
 
     # allocating resources for parallel reading
@@ -148,8 +148,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     metric_logger.add_meter('class_error', utils.SmoothedValue(window_size=1, fmt='{value:.2f}'))
 
     with stdout_to_tqdm() as save_stdout:
-        for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1),
-                                                      file=save_stdout, ncols=67), print_freq=10, header=header):
+        for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1), file=save_stdout, ncols=67), print_freq=10, header=header):
             training = pinned_training_queue.get(block=True)
             print(type(training))##
             viz_split = 'train'
@@ -225,11 +224,11 @@ if __name__ == "__main__":
     # print(type(training_dbs[0]))
     # print(type(training_dbs[1]))
     print("################################")
-    # print("system config...")
-    # pprint.pprint(system_configs.full)
-    #
-    # print("db config...")
-    # pprint.pprint(training_dbs[0].configs)
+    print("system config...")
+    pprint.pprint(system_configs.full)
+
+    print("db config...")
+    pprint.pprint(training_dbs[0].configs)
 
     print("len of training db: {}".format(len(training_dbs[0].db_inds)))
     print("len of testing db: {}".format(len(validation_db.db_inds)))
