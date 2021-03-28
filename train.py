@@ -97,7 +97,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     # load data sampling function
     data_file   = "sample.{}".format(training_dbs[0].data) # "sample.coco"
     sample_data = importlib.import_module(data_file).sample_data
-    # print(type(sample_data)) # function
+    print(type(sample_data)) # function
 
 
     # allocating resources for parallel reading
@@ -221,9 +221,9 @@ if __name__ == "__main__":
     print("using {} threads".format(threads))
     training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
     validation_db = datasets[dataset](configs["db"], val_split)
-    print(len(training_dbs[1]))
-    print(type(training_dbs[0]))
-    print(type(training_dbs[1]))
+    # print(len(training_dbs[1]))
+    # print(type(training_dbs[0]))
+    # print(type(training_dbs[1]))
     print("################################")
     # print("system config...")
     # pprint.pprint(system_configs.full)

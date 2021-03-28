@@ -16,11 +16,9 @@ class Network(nn.Module):
 
     def forward(self, iteration, save, viz_split, xs, ys, **kwargs):
         preds = self.model(*xs, **kwargs)
-
         loss = self.loss(iteration, save, viz_split, preds, ys, **kwargs)
         # 去掉weight
         return loss
-
 
 # for model backward compatibility
 # previously model was wrapped by DataParallel module
