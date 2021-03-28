@@ -221,8 +221,9 @@ if __name__ == "__main__":
     print("using {} threads".format(threads))
     training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
     validation_db = datasets[dataset](configs["db"], val_split)
-    print(training_dbs)
+    print(len(training_dbs))
     print(type(training_dbs))
+    print("################################")
     # print("system config...")
     # pprint.pprint(system_configs.full)
     #
