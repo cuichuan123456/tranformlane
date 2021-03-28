@@ -46,7 +46,7 @@ def prefetch_data(db, queue, sample_data):
     np.random.seed(os.getpid())
     while True:
         try:
-            data, ind = sample_data(db, ind)
+            data, ind = sample_data(db, ind)  #这个是对tusimple类的调用。。
             queue.put(data)
         except Exception as e:
             traceback.print_exc()
@@ -96,13 +96,13 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     pinned_validation_queue = queue.Queue(5)
 
     # load data sampling function
-    data_file   = "sample.{}".format(training_dbs[0].data) # "sample.coco"
-    sample_data = importlib.import_module(data_file).sample_data
-    print(type(sample_data)) # function 测试1
+    data_file   = "sample.{}".format(training_dbs[0].data) # "tusimple.py"
+    sample_data = importlib.import_module(data_file).sample_data  #初始话tusimple.py函数。。
+    # print(type(sample_data)) # function 测试1
 
 
     # allocating resources for parallel reading
-    training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)       #读取数据。8
+    training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)       #使用sampel_data调用的tusimple.py使数据经过处理载入queue。
     if val_iter:
         validation_tasks = init_parallel_jobs([validation_db], validation_queue, sample_data)
 
@@ -121,6 +121,7 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     validation_pin_thread.daemon = True
     validation_pin_thread.start()
 
+    pdb.set_trace()
 
     print("building model...")
     nnet = NetworkFactory(flag=True)
@@ -151,10 +152,10 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     with stdout_to_tqdm() as save_stdout:
         for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1), file=save_stdout, ncols=67), print_freq=10, header=header):
             training = pinned_training_queue.get(block=True)
-            print(type(training))##
-            print(len(training))
-            print("222222222222222222222222222")
-            print(**training[1])
+            # print(type(training))##
+            # print(len(training))
+            # print("222222222222222222222222222")
+            # print(**training[1])
             viz_split = 'train'
             save = True if (display and iteration % display == 0) else False
             (set_loss, loss_dict) \
