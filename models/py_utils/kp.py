@@ -271,10 +271,11 @@ class kp(nn.Module):
 
         query_embeds = None
 
-        query_embeds = self.query_embed.weight
+        query_embeds = self.query_embed.weight  #[7,64]
         hs = self.transformer(srcs, masks, pos, query_embeds)
+        hs=hs.transpose(1,2)
         pdb.set_trace()
-
+        # [2, 7, 1, 32]
 
         output_class = self.class_embed(hs)
         output_specific = self.specific_embed(hs)
