@@ -254,7 +254,7 @@ class kp(nn.Module):
             assert mask is not None
         if 4 > len(srcs):
             _len_srcs = len(srcs)
-            for l in range(_len_srcs, self.num_feature_levels):
+            for l in range(_len_srcs, 4):
                 if l == _len_srcs:
                     src = self.input_proj[l](features[-1].tensors)
                 else:
