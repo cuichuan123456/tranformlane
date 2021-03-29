@@ -224,8 +224,7 @@ class kp(nn.Module):
 
         # if not isinstance(xs, NestedTensor):
         #     xs = nested_tensor_from_tensor_list(xs)
-        xs[0] = xs[0].cuda()
-        xs[1] = xs[1].cuda()
+        xs = [xs[0].cuda(), xs[1].cuda()]
         xs = NestedTensor(xs[0], xs[1].squeeze(1))
         features, pos = self.backbone(xs)
 
