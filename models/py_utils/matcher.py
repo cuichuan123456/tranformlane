@@ -16,7 +16,7 @@ class HungarianMatcher(nn.Module):
     """
     def __init__(self, cost_class: float = 1,
                  curves_weight: float = 1, lower_weight: float = 1, upper_weight: float = 1):
-        """Creates the matcher
+        """Creates the matcher  #3，5，2，2
         """
         super().__init__()
         self.cost_class = cost_class
@@ -86,6 +86,6 @@ class HungarianMatcher(nn.Module):
 
 
 def build_matcher(set_cost_class,
-                  curves_weight, lower_weight, upper_weight):
+                  curves_weight, lower_weight, upper_weight):  #3，5，2，2
     return HungarianMatcher(cost_class=set_cost_class,
                             curves_weight=curves_weight, lower_weight=lower_weight, upper_weight=upper_weight)
