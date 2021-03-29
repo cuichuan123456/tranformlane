@@ -190,7 +190,7 @@ class kp(nn.Module):
         self.norm_layer = norm_layer
 ######################################################
         def build_backbone():
-            position_embedding = build_position_encoding(attn_dim,'v2')
+            position_embedding = build_position_encoding(attn_dim,'v3')
             train_backbone =2e-5
             return_interm_layers = True              #args.masks or (args.num_feature_levels > 1)
             backbone = Backbone('resnet50', train_backbone, return_interm_layers, dilation=False)
