@@ -221,7 +221,10 @@ class kp(nn.Module):
                - samples.mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels"""
         # images = xs[0]  # B 3 360 640
         # masks = xs[1]  # B 1 360 640
-        xs = nested_tensor_from_tensor_list(xs)
+
+        # if not isinstance(xs, NestedTensor):
+        #     xs = nested_tensor_from_tensor_list(xs)
+        xs = NestedTensor(xs[0], xs[1].squeeze(1))
         features, pos = self.backbone(xs)
 
         srcs = []
