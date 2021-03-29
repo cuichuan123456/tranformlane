@@ -267,8 +267,8 @@ class kp(nn.Module):
                 pos.append(pos_l)
 
         query_embeds = None
-        if not self.two_stage:
-            query_embeds = self.query_embed.weight
+
+        query_embeds = self.query_embed.weight
         hs = self.transformer(srcs, masks, pos, query_embeds)
 
         #将weight去掉，_
