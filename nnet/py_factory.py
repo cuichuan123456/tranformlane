@@ -56,6 +56,7 @@ class NetworkFactory(object):
         # Count MACs when input is 360 x 640 x 3
         input_test = torch.randn(1, 3, 360, 640).cuda()
         input_mask = torch.randn(1, 3, 360, 640).cuda()
+        self.model = self.model.cuda()
         macs, params, = profile(self.model, inputs=(input_test, input_mask), verbose=False)
         #此处有bug。。
 
