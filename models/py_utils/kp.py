@@ -247,7 +247,7 @@ class kp(nn.Module):
         #     xs = nested_tensor_from_tensor_list(xs)
         xs = NestedTensor(xs[0], xs[1].squeeze(1))
         features, pos = self.backbone(xs)
-
+        pdb.set_trace()
         srcs = []
         masks = []
         for l, feat in enumerate(features):
