@@ -221,6 +221,7 @@ class kp(nn.Module):
             ))
             in_channels = hidden_dim
         self.input_proj = nn.ModuleList(input_proj_list)
+        ##########################################################
         self.transformer = build_transformer(hidden_dim=hidden_dim, dropout=drop_out, nheads=num_heads,
                                              dim_feedforward=dim_feedforward,
                                              enc_layers=enc_layers,
@@ -251,7 +252,7 @@ class kp(nn.Module):
             srcs.append(self.input_proj[l](src))
             masks.append(mask)
             assert mask is not None
-        if self.num_feature_levels > len(srcs):
+        if 4 > len(srcs):
             _len_srcs = len(srcs)
             for l in range(_len_srcs, self.num_feature_levels):
                 if l == _len_srcs:
