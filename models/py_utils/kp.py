@@ -202,8 +202,25 @@ class kp(nn.Module):
         self.aux_loss = aux_loss
         self.position_embedding = build_position_encoding(hidden_dim=hidden_dim, type=pos_type)
         self.query_embed = nn.Embedding(num_queries, hidden_dim)
-        self.input_proj = nn.Conv2d(res_dims[-1], hidden_dim, kernel_size=1)  # the same as channel of self.layer4
 
+
+        # self.input_proj = nn.Conv2d(res_dims[-1], hidden_dim, kernel_size=1)  # the same as channel of self.layer4
+        #########################################3
+        num_backbone_outs = len(self.backbone.strides)
+        input_proj_list = []
+        for _ in range(num_backbone_outs):
+            in_channels = self.backbone.num_channels[_]
+            input_proj_list.append(nn.Sequential(
+                nn.Conv2d(in_channels, hidden_dim, kernel_size=1),
+                nn.GroupNorm(32, hidden_dim),
+            ))
+        for _ in range(4 - num_backbone_outs):
+            input_proj_list.append(nn.Sequential(
+                nn.Conv2d(in_channels, hidden_dim, kernel_size=3, stride=2, padding=1),
+                nn.GroupNorm(32, hidden_dim),
+            ))
+            in_channels = hidden_dim
+        self.input_proj = nn.ModuleList(input_proj_list)
         self.transformer = build_transformer(hidden_dim=hidden_dim, dropout=drop_out, nheads=num_heads,
                                              dim_feedforward=dim_feedforward,
                                              enc_layers=enc_layers,
