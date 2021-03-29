@@ -194,14 +194,15 @@ class kp(nn.Module):
             train_backbone =2e-5
             return_interm_layers = True              #args.masks or (args.num_feature_levels > 1)
             backbone = Backbone('resnet50', train_backbone, return_interm_layers, dilation=False)
-            model = Joiner(backbone, position_embedding)   #这个位置传入参数的时候可能出错。。
+            model = Joiner(backbone, position_embedding)
             return model
         self.backbone=build_backbone()
 ####################################################################
         hidden_dim = attn_dim
         self.aux_loss = aux_loss
         self.position_embedding = build_position_encoding(hidden_dim=hidden_dim, type=pos_type)
-        self.query_embed = nn.Embedding(num_queries, hidden_dim)
+
+        self.query_embed = nn.Embedding(num_queries, hidden_dim*2)
 
 
         # self.input_proj = nn.Conv2d(res_dims[-1], hidden_dim, kernel_size=1)  # the same as channel of self.layer4
