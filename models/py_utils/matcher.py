@@ -6,6 +6,7 @@ import torch
 from scipy.optimize import linear_sum_assignment
 from torch import nn
 
+import pdb
 
 class HungarianMatcher(nn.Module):
     """This class computes an assignment between the targets and the predictions of the network
@@ -82,6 +83,7 @@ class HungarianMatcher(nn.Module):
         sizes = [tgt.shape[0] for tgt in targets]
 
         indices = [linear_sum_assignment(c[i]) for i, c in enumerate(C.split(sizes, -1))]
+        pdb.set_trace()
         return [(torch.as_tensor(i, dtype=torch.int64), torch.as_tensor(j, dtype=torch.int64)) for i, j in indices]
 
 
