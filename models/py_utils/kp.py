@@ -71,9 +71,6 @@ class Joiner(nn.Sequential):
             pos.append(self[1](x).to(x.tensors.dtype))
         return out, pos
 
-
-
-
 ##################################3
 
 class FrozenBatchNorm2d(torch.nn.Module):
@@ -201,17 +198,6 @@ class kp(nn.Module):
             return model
         self.backbone=build_backbone()
 ####################################################################
-        # self.inplanes = res_dims[0]
-        # self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
-        # self.bn1 = self.norm_layer(self.inplanes)
-        # self.relu = nn.ReLU(inplace=True)
-        # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-
-        # self.layer1 = self._make_layer(block, res_dims[0], layers[0], stride=res_strides[0])
-        # self.layer2 = self._make_layer(block, res_dims[1], layers[1], stride=res_strides[1])
-        # self.layer3 = self._make_layer(block, res_dims[2], layers[2], stride=res_strides[2])
-        # self.layer4 = self._make_layer(block, res_dims[3], layers[3], stride=res_strides[3])
-
         hidden_dim = attn_dim
         self.aux_loss = aux_loss
         self.position_embedding = build_position_encoding(hidden_dim=hidden_dim, type=pos_type)
@@ -229,21 +215,10 @@ class kp(nn.Module):
         self.specific_embed = MLP(hidden_dim, hidden_dim, lsp_dim - 4, mlp_layers)
         self.shared_embed = MLP(hidden_dim, hidden_dim, 4, mlp_layers)
 
-    #
-    # def _make_layer(self, block, planes, blocks, stride=1):
-    #     downsample = None
-    #     if stride != 1 or self.inplanes != planes * block.expansion:
-    #         downsample = nn.Sequential(
-    #             nn.Conv2d(self.inplanes, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
-    #             nn.BatchNorm2d(planes * block.expansion, momentum=BN_MOMENTUM), )
-    #     layers = []
-    #     layers.append(block(self.inplanes, planes, stride, downsample))
-    #     self.inplanes = planes * block.expansion
-    #     for i in range(1, blocks):
-    #         layers.append(block(self.inplanes, planes))
-    #     return nn.Sequential(*layers)
-
     def _train(self, *xs, **kwargs):  # 这个是主train。。。
+        """ The forward expects a NestedTensor, which consists of:
+               - samples.tensor: batched images, of shape [batch_size x 3 x H x W]
+               - samples.mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels"""
         # images = xs[0]  # B 3 360 640
         # masks = xs[1]  # B 1 360 640
         xs = nested_tensor_from_tensor_list(xs)

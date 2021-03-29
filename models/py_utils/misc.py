@@ -15,7 +15,7 @@ from typing import Optional, List
 import torch
 import torch.distributed as dist
 from torch import Tensor
-
+import pdb
 # needed due to empty tensor bug in pytorch and torchvision 0.5
 import torchvision
 if float(torchvision.__version__[:3]) < 0.7:
@@ -284,7 +284,9 @@ def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
     # TODO make this more general
     # print(type(tensor_list))
     # print(len(tensor_list))
+    pdb.set_trace()
     if tensor_list[0].ndim == 3:
+
         # TODO make it support different-sized images
         max_size = _max_by_axis([list(img.shape) for img in tensor_list])
         # min_size = tuple(min(s) for s in zip(*[img.shape for img in tensor_list]))
