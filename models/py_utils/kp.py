@@ -184,16 +184,15 @@ class kp(nn.Module):
                  num_cls=None,  # 2
                  norm_layer=FrozenBatchNorm2d
                  ):
-
         super(kp, self).__init__()
         self.flag = flag
         # above all waste not used
-        self.norm_layer = norm_layer
+        # self.norm_layer = norm_layer
 ######################################################
         def build_backbone():
             position_embedding = build_position_encoding(attn_dim,'v3')
             train_backbone =2e-5
-            return_interm_layers = True              #args.masks or (args.num_feature_levels > 1)
+            return_interm_layers = True
             backbone = Backbone('resnet50', train_backbone, return_interm_layers, dilation=False)
             model = Joiner(backbone, position_embedding)
             return model
@@ -202,13 +201,8 @@ class kp(nn.Module):
         hidden_dim = attn_dim
         self.aux_loss = aux_loss
         self.position_embedding = build_position_encoding(hidden_dim=hidden_dim, type=pos_type)
+        self.query_embed = nn.Embedding(num_queries, hidden_dim*2) #为什么要*2 在车道线里面没有。。
 
-        self.query_embed = nn.Embedding(num_queries, hidden_dim*2)
-        #为什么要*2 在车道线里面没有。。
-
-
-        # self.input_proj = nn.Conv2d(res_dims[-1], hidden_dim, kernel_size=1)  # the same as channel of self.layer4
-        #########################################3
         num_backbone_outs = len(self.backbone.strides)
         input_proj_list = []
         for _ in range(num_backbone_outs):
@@ -242,6 +236,7 @@ class kp(nn.Module):
                - samples.mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels"""
         # images = xs[0]  # B 3 360 640
         # masks = xs[1]  # B 1 360 640   #bitchsize=1
+        pdb.set_trace()
 
         xs = NestedTensor(xs[0], xs[1].squeeze(1))
         features, pos = self.backbone(xs)

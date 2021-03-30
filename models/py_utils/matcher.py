@@ -29,14 +29,14 @@ class HungarianMatcher(nn.Module):
         self.upper_weight = upper_weight
 
     @torch.no_grad()
-    def forward(self, outputs, targets):
+    def forward(self, outputs, targets):  #targets[0].shape   [4,115]  len(outputs)  2
         """ Performs the matching
         """
-        bs, num_queries = outputs["pred_logits"].shape[:2]
+        bs, num_queries = outputs["pred_logits"].shape[:2]  #16,7    3
 
         # We flatten to compute the cost matrices in a batch
-        out_prob = outputs["pred_logits"].flatten(0, 1).softmax(-1)
-        tgt_ids  = torch.cat([tgt[:, 0] for tgt in targets]).long()
+        out_prob = outputs["pred_logits"].flatten(0, 1).softmax(-1)   #112,3
+        tgt_ids  = torch.cat([tgt[:, 0] for tgt in targets]).long() #63
 
         # Compute the classification cost. Contrary to the loss, we don't use the NLL,
         # but approximate it in 1 - proba[target class].
@@ -78,12 +78,19 @@ class HungarianMatcher(nn.Module):
         C = self.cost_class * cost_class + self.curves_weight * cost_polys + \
             self.lower_weight * cost_lower + self.upper_weight * cost_upper
 
-        C = C.view(bs, num_queries, -1).cpu()
+        C = C.view(bs, num_queries, -1).cpu()  #(16,7,62)   origin (16,7,63)
 
-        sizes = [tgt.shape[0] for tgt in targets]
-        pdb.set_trace()
-        indices = [linear_sum_assignment(c[i]) for i, c in enumerate(C.split(sizes, -1))]
-
+        sizes = [tgt.shape[0] for tgt in targets]  #[4, 4, 4, 3, 4,  4, 4, 4, 4, 4,  3, 4, 5, 4, 4, 3]
+        #origin [4, 4, 4, 3, 3,  5, 3, 5, 5, 3,  3, 4, 3, 4, 5, 5]
+        # pdb.set_trace()
+        indices = [linear_sum_assignment(c[i]) for i, c in enumerate(C.split(sizes, -1))] #len()  16  origin 16
+        #[(array([1, 3, 4, 6]), array([1, 3, 2, 0])), (array([1, 2, 3, 4]), array([1, 3, 0, 2])), (array([1, 2, 4, 6]), array([2, 0, 1, 3])), (array([1, 2, 6]), array([2, 0, 1])), (array([1, 2, 4, 6]), array([2, 3, 1, 0])),
+        # (array([1, 2, 4, 6]), array([0, 3, 1, 2])), (array([1, 2, 4, 6]), array([0, 1, 2, 3])), (array([1, 2, 3, 6]), array([1, 3, 0, 2])), (array([1, 2, 4, 6]), array([1, 3, 0, 2])), (array([1, 2, 4, 6]),
+        # array([2, 0, 1, 3])), (array([1, 4, 6]), array([1, 0, 2])), (array([1, 2, 3, 6]), array([2, 0, 3, 1])), (array([1, 2, 3, 4, 6]), array([2, 1, 0, 3, 4])),
+        # (array([1, 3, 4, 6]), array([0, 3, 1, 2])), (array([0, 1, 4, 6]), array([0, 1, 2, 3])), (array([1, 2, 4]), array([1, 2, 0]))]
+        #orign :  [(array([0, 2, 4, 5]), array([2, 1, 3, 0])), (array([1, 3, 4, 5]), array([2, 3, 1, 0])), (array([0, 3, 4, 6]), array([0, 1, 3, 2])), (array([0, 2, 5]), array([0, 1, 2])), (array([3, 4, 6]), array([0, 2, 1])), (array([0, 1, 3, 4, 6]),
+         #  array([0, 3, 2, 1, 4])), (array([2, 3, 5]), array([0, 2, 1])), (array([0, 1, 2, 4, 6]), array([0, 2, 3, 4, 1])), (array([0, 1, 2, 3, 4]), array([4, 2, 1, 3, 0])), (array([0, 1, 5]), array([1, 2, 0])), (array([2, 3, 4]), array([2, 0, 1])), (array([0, 1, 4, 6]),
+         # array([1, 0, 2, 3])), (array([0, 3, 4]), array([2, 0, 1])), (array([1, 2, 4, 5]), array([1, 3, 2, 0])), (array([0, 1, 3, 5, 6]), array([3, 2, 1, 0, 4])), (array([2, 3, 4, 5, 6]), array([3, 4, 0, 1, 2]))]
         return [(torch.as_tensor(i, dtype=torch.int64), torch.as_tensor(j, dtype=torch.int64)) for i, j in indices]
 
 
