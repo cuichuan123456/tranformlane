@@ -25,7 +25,8 @@ class BackboneBase(nn.Module):
         for name, parameter in backbone.named_parameters():
             if not train_backbone or 'layer2' not in name and 'layer3' not in name and 'layer4' not in name:
                 parameter.requires_grad_(False)
-        if return_interm_layers:
+        # if return_interm_layers:
+        if True:
             return_layers = {"layer1": "0", "layer2": "1", "layer3": "2", "layer4": "3"}
             #return_layers = {"layer2": "0", "layer3": "1", "layer4": "2"}
             self.strides = [8, 16, 32]
