@@ -268,7 +268,7 @@ class kp(nn.Module):
         hs = self.transformer(srcs, masks, pos, query_embeds)
         hs=hs.transpose(1,2)
         # pdb.set_trace()
-        # [2, 7, 1, 32]
+        # [2, 7, 1, 32]    transpose 之后就是[2,1,7,32]
 
         output_class = self.class_embed(hs)
         output_specific = self.specific_embed(hs)
@@ -312,6 +312,7 @@ class AELoss(nn.Module):
                                 curves_weight=weight_dict['loss_curves'], #5
                                 lower_weight=weight_dict['loss_lowers'], #2
                                 upper_weight=weight_dict['loss_uppers']) #2
+
         losses = ['labels', 'curves', 'cardinality']
 
         if aux_loss:
