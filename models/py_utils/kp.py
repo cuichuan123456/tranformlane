@@ -26,8 +26,8 @@ class BackboneBase(nn.Module):
             if not train_backbone or 'layer2' not in name and 'layer3' not in name and 'layer4' not in name:
                 parameter.requires_grad_(False)
         if return_interm_layers:
-            # return_layers = {"layer1": "0", "layer2": "1", "layer3": "2", "layer4": "3"}
-            return_layers = {"layer2": "0", "layer3": "1", "layer4": "2"}
+            return_layers = {"layer1": "0", "layer2": "1", "layer3": "2", "layer4": "3"}
+            #return_layers = {"layer2": "0", "layer3": "1", "layer4": "2"}
             self.strides = [8, 16, 32]
             self.num_channels = [512, 1024, 2048]
         else:
@@ -333,7 +333,7 @@ class AELoss(nn.Module):
                 outputs,
                 targets):
 
-        gt_cluxy = [tgt[0] for tgt in targets[1:]]
+        gt_cluxy = [tgt[0] for tgt in targets[1:]]     #此处是输入。
         loss_dict, indices = self.criterion(outputs, gt_cluxy)
         weight_dict = self.criterion.weight_dict
         losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)

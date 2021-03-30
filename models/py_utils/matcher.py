@@ -29,30 +29,30 @@ class HungarianMatcher(nn.Module):
         self.upper_weight = upper_weight
 
     @torch.no_grad()
-    def forward(self, outputs, targets):  #targets[0].shape   [4,115]  len(outputs)  2
+    def forward(self, outputs, targets):  #targets[0].shape   [4,115] origin 16 3,115  len(outputs)  2
         """ Performs the matching
         """
         bs, num_queries = outputs["pred_logits"].shape[:2]  #16,7    3
 
         # We flatten to compute the cost matrices in a batch
         out_prob = outputs["pred_logits"].flatten(0, 1).softmax(-1)   #112,3
-        tgt_ids  = torch.cat([tgt[:, 0] for tgt in targets]).long() #63
-
+        tgt_ids  = torch.cat([tgt[:, 0] for tgt in targets]).long() #63  len(targets)  16..
+        # targets[0][:, 0].shape 4   origin 3
         # Compute the classification cost. Contrary to the loss, we don't use the NLL,
         # but approximate it in 1 - proba[target class].
         # The 1 is a constant that doesn't change the matching, it can be ommitted.
-        cost_class = -out_prob[:, tgt_ids]
+        cost_class = -out_prob[:, tgt_ids]  #112,63  origin 112  62
 
-        out_bbox = outputs["pred_curves"]
-        tgt_uppers = torch.cat([tgt[:, 2] for tgt in targets])
-        tgt_lowers = torch.cat([tgt[:, 1] for tgt in targets])
+        out_bbox = outputs["pred_curves"]  #16,7,8   #16,7,8
+        tgt_uppers = torch.cat([tgt[:, 2] for tgt in targets]) #63  origin 62
+        tgt_lowers = torch.cat([tgt[:, 1] for tgt in targets]) #63
 
         # # Compute the L1 cost between lowers and uppers
-        cost_lower = torch.cdist(out_bbox[:, :, 0].view((-1, 1)), tgt_lowers.unsqueeze(-1), p=1)
-        cost_upper = torch.cdist(out_bbox[:, :, 1].view((-1, 1)), tgt_uppers.unsqueeze(-1), p=1)
+        cost_lower = torch.cdist(out_bbox[:, :, 0].view((-1, 1)), tgt_lowers.unsqueeze(-1), p=1) #112,63
+        cost_upper = torch.cdist(out_bbox[:, :, 1].view((-1, 1)), tgt_uppers.unsqueeze(-1), p=1) #112,63
 
         # # Compute the poly cost
-        tgt_points = torch.cat([tgt[:, 3:] for tgt in targets]) # 0~20 112
+        tgt_points = torch.cat([tgt[:, 3:] for tgt in targets]) # 0~20 112   origin 62,112
         tgt_xs = tgt_points[:, :tgt_points.shape[1] // 2]
         valid_xs = tgt_xs >= 0
         weights = (torch.sum(valid_xs, dtype=torch.float32) / torch.sum(valid_xs, dim=1, dtype=torch.float32))**0.5
@@ -72,12 +72,12 @@ class HungarianMatcher(nn.Module):
         tgt_xs = tgt_xs.transpose(0, 1)
 
         cost_polys = torch.stack([torch.sum(torch.abs(tgt_x[valid_x] - out_x[valid_x]), dim=0) for tgt_x, out_x, valid_x in zip(tgt_xs, out_xs, valid_xs)], dim=-1)
-        cost_polys = cost_polys * weights
+        cost_polys = cost_polys * weights  #112,63
 
         # # Final cost matrix
         C = self.cost_class * cost_class + self.curves_weight * cost_polys + \
             self.lower_weight * cost_lower + self.upper_weight * cost_upper
-
+            #(112,63)
         C = C.view(bs, num_queries, ).cpu()  #(16,7,62)   origin (16,7,63)
 
         sizes = [tgt.shape[0] for tgt in targets]  #[4, 4, 4, 3, 4,  4, 4, 4, 4, 4,  3, 4, 5, 4, 4, 3]

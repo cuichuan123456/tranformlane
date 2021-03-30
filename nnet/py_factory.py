@@ -98,7 +98,7 @@ class NetworkFactory(object):
 
         self.optimizer.zero_grad()
         loss_kp = self.network(iteration, save, viz_split, xs, ys)  # 需要知道参数的含义； nnet.train(iteration, save, viz_split, **training)。
-            # **train 中xs使用在medol中  model的输出preds，ys使用在loss中。
+        #                               origin [16, 3, 360, 640]    [16, 3, 360, 640]
         loss = loss_kp[0]
         loss_dict = loss_kp[1:]
         loss = loss.mean()
