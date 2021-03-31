@@ -73,7 +73,7 @@ class Joiner(nn.Sequential):
             pos.append(self[1](x).to(x.tensors.dtype))
         return out, pos
 
-##################################3
+
 
 class FrozenBatchNorm2d(torch.nn.Module):
     """
@@ -129,7 +129,6 @@ class MLP(nn.Module):
         for i, layer in enumerate(self.layers):
             x = F.relu(layer(x)) if i < self.num_layers - 1 else layer(x)
         return x
-
 
 # class BasicBlock(nn.Module):
 #     expansion = 1
@@ -187,8 +186,7 @@ class kp(nn.Module):
                  ):
         super(kp, self).__init__()
         self.flag = flag
-        # above all waste not used
-        # self.norm_layer = norm_layer
+
 ######################################################
         def build_backbone():
             position_embedding = build_position_encoding(attn_dim,'v3')
@@ -219,6 +217,11 @@ class kp(nn.Module):
             ))
             in_channels = hidden_dim
         self.input_proj = nn.ModuleList(input_proj_list)
+
+        for proj in self.input_proj:
+            nn.init.xavier_uniform_(proj[0].weight, gain=1)
+            nn.init.constant_(proj[0].bias, 0)
+
         ##########################################################
         self.transformer = build_transformer(hidden_dim=hidden_dim, dropout=drop_out, nheads=num_heads,
                                              dim_feedforward=dim_feedforward,

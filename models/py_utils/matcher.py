@@ -78,7 +78,7 @@ class HungarianMatcher(nn.Module):
         C = self.cost_class * cost_class + self.curves_weight * cost_polys + \
             self.lower_weight * cost_lower + self.upper_weight * cost_upper
             #(112,63)
-        C = C.view(bs, num_queries, ).cpu()  #(16,7,62)   origin (16,7,63)
+        C = C.view(bs, num_queries, -1).cpu()  #(16,7,62)   origin (16,7,63)
 
         sizes = [tgt.shape[0] for tgt in targets]  #[4, 4, 4, 3, 4,  4, 4, 4, 4, 4,  3, 4, 5, 4, 4, 3]
         #origin [4, 4, 4, 3, 3,  5, 3, 5, 5, 3,  3, 4, 3, 4, 5, 5]
