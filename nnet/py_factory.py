@@ -7,7 +7,7 @@ from config import system_configs
 from models.py_utils.data_parallel import DataParallel
 
 torch.manual_seed(317)
-
+import pdb
 class Network(nn.Module):
     def __init__(self, model, loss):
         super(Network, self).__init__()
@@ -98,7 +98,7 @@ class NetworkFactory(object):
 
         self.optimizer.zero_grad()
         loss_kp = self.network(iteration, save, viz_split, xs, ys)  # 需要知道参数的含义； nnet.train(iteration, save, viz_split, **training)。
-        #                               origin [16, 3, 360, 640]    [16, 3, 360, 640]
+        #    origin [16, 3, 360, 640]    [16, 3, 360, 640]
         loss = loss_kp[0]
         loss_dict = loss_kp[1:]
         loss = loss.mean()
