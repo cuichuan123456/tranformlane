@@ -73,8 +73,6 @@ class Joiner(nn.Sequential):
             pos.append(self[1](x).to(x.tensors.dtype))
         return out, pos
 
-
-
 class FrozenBatchNorm2d(torch.nn.Module):
     """
     BatchNorm2d where the batch statistics and the affine parameters are fixed.
@@ -189,7 +187,7 @@ class kp(nn.Module):
 
 ######################################################
         def build_backbone():
-            position_embedding = build_position_encoding(attn_dim,'v3')
+            position_embedding = build_position_encoding(attn_dim,'sine')
             train_backbone =2e-5
             return_interm_layers = True
             backbone = Backbone('resnet50', train_backbone, return_interm_layers, dilation=False)
