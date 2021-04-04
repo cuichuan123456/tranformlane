@@ -15,7 +15,7 @@ from typing import Optional, List
 import torch
 import torch.distributed as dist
 from torch import Tensor
-
+import pdb
 # needed due to empty tensor bug in pytorch and torchvision 0.5
 import torchvision
 if float(torchvision.__version__[:3]) < 0.7:
@@ -284,7 +284,9 @@ def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
     # TODO make this more general
     # print(type(tensor_list))
     # print(len(tensor_list))
+    pdb.set_trace()
     if tensor_list[0].ndim == 3:
+
         # TODO make it support different-sized images
         max_size = _max_by_axis([list(img.shape) for img in tensor_list])
         # min_size = tuple(min(s) for s in zip(*[img.shape for img in tensor_list]))
@@ -431,3 +433,18 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
         return _new_empty_tensor(input, output_shape)
     else:
         return torchvision.ops.misc.interpolate(input, size, scale_factor, mode, align_corners)
+
+
+def get_total_grad_norm(parameters, norm_type=2):
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
+    norm_type = float(norm_type)
+    device = parameters[0].grad.device
+    total_norm = torch.norm(torch.stack([torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]),
+                            norm_type)
+    return total_norm
+
+def inverse_sigmoid(x, eps=1e-5):
+    x = x.clamp(min=0, max=1)
+    x1 = x.clamp(min=eps)
+    x2 = (1 - x).clamp(min=eps)
+    return torch.log(x1/x2)

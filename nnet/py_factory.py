@@ -7,25 +7,17 @@ from config import system_configs
 from models.py_utils.data_parallel import DataParallel
 
 torch.manual_seed(317)
-
+import pdb
 class Network(nn.Module):
     def __init__(self, model, loss):
         super(Network, self).__init__()
-
         self.model = model
-        self.loss  = loss
+        self.loss = loss
 
-    def forward(self, iteration, save, viz_split,
-                xs, ys, **kwargs):
-
-        preds, weights = self.model(*xs, **kwargs)
-
-        loss  = self.loss(iteration,
-                          save,
-                          viz_split,
-                          preds,
-                          ys,
-                          **kwargs)
+    def forward(self, iteration, save, viz_split, xs, ys, **kwargs):
+        preds = self.model(*xs, **kwargs)
+        loss = self.loss(iteration, save, viz_split, preds, ys, **kwargs)
+        # 去掉weight
         return loss
 
 # for model backward compatibility
@@ -38,19 +30,19 @@ class DummyModule(nn.Module):
     def forward(self, *xs, **kwargs):
         return self.module(*xs, **kwargs)
 
+
 class NetworkFactory(object):
     def __init__(self, flag=False):
         super(NetworkFactory, self).__init__()
-
         module_file = "models.{}".format(system_configs.snapshot_name)
         # print("module_file: {}".format(module_file)) # models.CornerNet
-        nnet_module = importlib.import_module(module_file)
+        nnet_module = importlib.import_module(module_file)  # kp.py
 
-        self.model   = DummyModule(nnet_module.model(flag=flag))
-        self.loss    = nnet_module.loss()
+        self.model = DummyModule(nnet_module.model(flag=flag))  # LSTR.model.
+        self.loss = nnet_module.loss()  # LSTR.loss
         self.network = Network(self.model, self.loss)
         self.network = DataParallel(self.network, chunk_sizes=system_configs.chunk_sizes)
-        self.flag    = flag
+        self.flag = flag
 
         # Count total parameters
         total_params = 0
@@ -63,20 +55,23 @@ class NetworkFactory(object):
 
         # Count MACs when input is 360 x 640 x 3
         input_test = torch.randn(1, 3, 360, 640).cuda()
-        input_mask = torch.randn(1, 3, 360, 640).cuda()
+        input_mask = torch.randn(1, 1, 360, 640).cuda()
+        self.model = self.model.cuda()
         macs, params, = profile(self.model, inputs=(input_test, input_mask), verbose=False)
+        #此处有bug。。
+
         macs, _ = clever_format([macs, params], "%.3f")
         print('MACs: {}'.format(macs))
-
 
         if system_configs.opt_algo == "adam":
             self.optimizer = torch.optim.Adam(
                 filter(lambda p: p.requires_grad, self.model.parameters())
             )
+
         elif system_configs.opt_algo == "sgd":
             self.optimizer = torch.optim.SGD(
                 filter(lambda p: p.requires_grad, self.model.parameters()),
-                lr=system_configs.learning_rate, 
+                lr=system_configs.learning_rate,
                 momentum=0.9, weight_decay=0.0001
             )
         elif system_configs.opt_algo == 'adamW':
@@ -97,26 +92,16 @@ class NetworkFactory(object):
     def eval_mode(self):
         self.network.eval()
 
-    def train(self,
-              iteration,
-              save,
-              viz_split,
-              xs,
-              ys,
-              **kwargs):
+    def train(self, iteration, save, viz_split, xs, ys, **kwargs):  # trian 传入参数。
         xs = [x.cuda(non_blocking=True) for x in xs]
         ys = [y.cuda(non_blocking=True) for y in ys]
 
         self.optimizer.zero_grad()
-        loss_kp = self.network(iteration,
-                               save,
-                               viz_split,
-                               xs,
-                               ys)
-
-        loss      = loss_kp[0]
+        loss_kp = self.network(iteration, save, viz_split, xs, ys)  # 需要知道参数的含义； nnet.train(iteration, save, viz_split, **training)。
+        #    origin [16, 3, 360, 640]    [16, 3, 360, 640]
+        loss = loss_kp[0]
         loss_dict = loss_kp[1:]
-        loss      = loss.mean()
+        loss = loss.mean()
 
         loss.backward()
         self.optimizer.step()
@@ -139,9 +124,9 @@ class NetworkFactory(object):
                                    viz_split,
                                    xs,
                                    ys)
-            loss      = loss_kp[0]
+            loss = loss_kp[0]
             loss_dict = loss_kp[1:]
-            loss      = loss.mean()
+            loss = loss.mean()
 
             return loss, loss_dict
 
@@ -174,7 +159,6 @@ class NetworkFactory(object):
             model_dict.update(pretrained_dict)
 
             self.model.load_state_dict(model_dict)
-
 
     def save_params(self, iteration):
         cache_file = system_configs.snapshot_file.format(iteration)

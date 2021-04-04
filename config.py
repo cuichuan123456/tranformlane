@@ -4,9 +4,9 @@ import numpy as np
 class Config:
     def __init__(self):
         self._configs = {}
-        self._configs["dataset"] = None
+        self._configs["dataset"] = "TUSimple"
         self._configs["sampling_function"] = "kp_detection"
-
+ #查看push
         # Training Config
         self._configs["display"]           = 5
         self._configs["snapshot"]          = 5000
@@ -27,7 +27,7 @@ class Config:
         self._configs["use_crop"]          = False
 
         # Directories
-        self._configs["data_dir"]   = "./data"
+        self._configs["data_dir"]   = "/home/ma-user/work/"
         self._configs["cache_dir"] = "./cache"
 
         self._configs["config_dir"] = "./config"
@@ -38,7 +38,6 @@ class Config:
         self._configs["val_split"]   = "minival"
         self._configs["test_split"]  = "testdev"
 
-
         # Rng
         self._configs["data_rng"] = np.random.RandomState(123)
         self._configs["nnet_rng"] = np.random.RandomState(317)
@@ -47,7 +46,7 @@ class Config:
         self._configs["res_layers"] = [2, 2, 2, 2]
         self._configs["res_dims"] = [64, 128, 256, 512]
         self._configs["res_strides"] = [1, 2, 2, 2]
-        self._configs["attn_dim"] = 64
+        self._configs["attn_dim"] = 256
         self._configs["dim_feedforward"] = 4 * 64
 
         self._configs["drop_out"] = 0.1

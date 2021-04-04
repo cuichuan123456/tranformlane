@@ -16,7 +16,6 @@ from config import system_configs
 from db.utils.lane import LaneEval
 from db.utils.metric import eval_json
 
-
 RED = (0, 0, 255)
 GREEN = (0, 255, 0)
 BLUE = (255, 0, 0)
@@ -57,8 +56,8 @@ class TUSIMPLE(DETECTION):
             "train+val": ['label_data_0313', 'label_data_0601', 'label_data_0531'],
             "val": ['label_data_0531'],
         }[self._split]
-
-        self.root = os.path.join(data_dir, 'TuSimple', 'LaneDetection')
+   #修改路径
+        self.root = os.path.join(data_dir, 'LaneDetection')
         if self.root is None:
             raise Exception('Please specify the root directory')
         self.img_w, self.img_h = 1280, 720  # tusimple original image resolution

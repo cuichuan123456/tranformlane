@@ -24,12 +24,11 @@ import models.py_utils.misc as utils
 torch.backends.cudnn.enabled   = True
 torch.backends.cudnn.benchmark = True
 
+# import pdb
 def parse_args():
     parser = argparse.ArgumentParser(description="Train CornerNet")
     parser.add_argument("cfg_file", help="config file", type=str)
-    parser.add_argument("--iter", dest="start_iter",
-                        help="train at iteration i",
-                        default=0, type=int)
+    parser.add_argument("--iter", dest="start_iter", help="train at iteration i", default=0, type=int)
     parser.add_argument("--threads", dest="threads", default=4, type=int)
     parser.add_argument("--freeze", action="store_true")
 
@@ -47,13 +46,14 @@ def prefetch_data(db, queue, sample_data):
     np.random.seed(os.getpid())
     while True:
         try:
-            data, ind = sample_data(db, ind)
+            data, ind = sample_data(db, ind)  #这个是对tusimple类的调用。。
             queue.put(data)
         except Exception as e:
             traceback.print_exc()
             raise e
 
 def pin_memory(data_queue, pinned_data_queue, sema):
+    #锁页内存，tensor传入GPU比较快。
     while True:
         data = data_queue.get()
 
@@ -96,12 +96,13 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     pinned_validation_queue = queue.Queue(5)
 
     # load data sampling function
-    data_file   = "sample.{}".format(training_dbs[0].data) # "sample.coco"
-    sample_data = importlib.import_module(data_file).sample_data
-    # print(type(sample_data)) # function
+    data_file   = "sample.{}".format(training_dbs[0].data) # "tusimple.py"
+    sample_data = importlib.import_module(data_file).sample_data  #初始话tusimple.py函数。。
+    # print(type(sample_data)) # function 测试1
+
 
     # allocating resources for parallel reading
-    training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)
+    training_tasks   = init_parallel_jobs(training_dbs, training_queue, sample_data)       #使用sampel_data调用的tusimple.py使数据经过处理载入queue。
     if val_iter:
         validation_tasks = init_parallel_jobs([validation_db], validation_queue, sample_data)
 
@@ -119,6 +120,8 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     validation_pin_thread = threading.Thread(target=pin_memory, args=validation_pin_args)
     validation_pin_thread.daemon = True
     validation_pin_thread.start()
+
+    # pdb.set_trace()
 
     print("building model...")
     nnet = NetworkFactory(flag=True)
@@ -147,15 +150,15 @@ def train(training_dbs, validation_db, start_iter=0, freeze=False):
     metric_logger.add_meter('class_error', utils.SmoothedValue(window_size=1, fmt='{value:.2f}'))
 
     with stdout_to_tqdm() as save_stdout:
-        for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1),
-                                                      file=save_stdout, ncols=67),
-                                                 print_freq=10, header=header):
-
+        for iteration in metric_logger.log_every(tqdm(range(start_iter + 1, max_iteration + 1), file=save_stdout, ncols=67), print_freq=10, header=header):
             training = pinned_training_queue.get(block=True)
+
             viz_split = 'train'
             save = True if (display and iteration % display == 0) else False
             (set_loss, loss_dict) \
                 = nnet.train(iteration, save, viz_split, **training)
+            #training的数据。。
+
             (loss_dict_reduced, loss_dict_reduced_unscaled, loss_dict_reduced_scaled, loss_value) = loss_dict
             metric_logger.update(loss=loss_value, **loss_dict_reduced_scaled, **loss_dict_reduced_unscaled)
             metric_logger.update(class_error=loss_dict_reduced['class_error'])
@@ -219,15 +222,13 @@ if __name__ == "__main__":
     print("using {} threads".format(threads))
     training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
     validation_db = datasets[dataset](configs["db"], val_split)
+    # pdb.set_trace()
 
-    # print("system config...")
-    # pprint.pprint(system_configs.full)
-    #
-    # print("db config...")
-    # pprint.pprint(training_dbs[0].configs)
 
     print("len of training db: {}".format(len(training_dbs[0].db_inds)))
     print("len of testing db: {}".format(len(validation_db.db_inds)))
-
     print("freeze the pretrained network: {}".format(args.freeze))
+
+#bug
     train(training_dbs, validation_db, args.start_iter, args.freeze) # 0
+ #查看training_dbs的格式  (img, label, idx)。。
