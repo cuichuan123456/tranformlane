@@ -6,7 +6,7 @@ import math
 import torch
 from torch import nn
 
-# from util.misc import NestedTensor
+from .misc import NestedTensor
 
 
 class PositionEmbeddingSine(nn.Module):
@@ -26,9 +26,9 @@ class PositionEmbeddingSine(nn.Module):
             scale = 2 * math.pi
         self.scale = scale  # 2pi
 
-    def forward(self, x, mask):
-        # x = tensor_list.tensors
-        # mask = tensor_list.mask  # the image location which is padded with 0 is set to be 1 at the corresponding mask location
+    def forward(self,tensor_list: NestedTensor):
+        x = tensor_list.tensors
+        mask = tensor_list.mask  # the image location which is padded with 0 is set to be 1 at the corresponding mask location
         assert mask is not None
         not_mask = ~mask  # image 0 -> 0
 
