@@ -27,7 +27,7 @@
 
         "cache_dir": "./cache",
         "result_dir": "./results",
-        "data_dir": "../../",
+        "data_dir": "/home/ma-user/work/CULane/Perceptual/",
 
         "res_layers": [1, 2, 2, 2],
 
