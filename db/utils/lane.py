@@ -12,15 +12,15 @@ class LaneEval(object):
     def get_angle(xs, y_samples):
         xs, ys = xs[xs >= 0], y_samples[xs >= 0]
         if len(xs) > 1:
-            LaneEval.lr.fit(ys[:, None], xs)
-            k = LaneEval.lr.coef_[0]
-            theta = np.arctan(k)
+            LaneEval.lr.fit(ys[:, None], xs)  #调用自己数据集。
+            k = LaneEval.lr.coef_[0]  #系数
+            theta = np.arctan(k)  #求角度。
         else:
             theta = 0
         return theta
 
     @staticmethod
-    def line_accuracy(pred, gt, thresh):
+    def line_accuracy(pred, gt, thresh):    #返回车道线的精确度。
         pred = np.array([p if p >= 0 else -100 for p in pred])
         gt = np.array([g if g >= 0 else -100 for g in gt])
         return np.sum(np.where(np.abs(pred - gt) < thresh, 1., 0.)) / len(gt)
@@ -35,21 +35,21 @@ class LaneEval(object):
             raise Exception('Format of lanes error.')
         if running_time > 20000 or len(gt) + 2 < len(pred):
             return 0., 0., 1.
-        angles = [LaneEval.get_angle(np.array(x_gts), np.array(y_samples)) for x_gts in gt]
-        threshs = [LaneEval.pixel_thresh / np.cos(angle) for angle in angles]
+        angles = [LaneEval.get_angle(np.array(x_gts), np.array(y_samples)) for x_gts in gt]  #gt 多个目标值。
+        threshs = [LaneEval.pixel_thresh / np.cos(angle) for angle in angles]  #20像素的距离除以cos（）可以得到。。。。
         line_accs = []
         fp, fn = 0., 0.
         matched = 0.
         my_matches = [False] * len(pred)
         my_accs = [0] * len(pred)
         my_dists = [None] * len(pred)
-        for x_gts, thresh in zip(gt, threshs):
+        for x_gts, thresh in zip(gt, threshs):  #从多个预测中选择匹配的gts
             accs = [LaneEval.line_accuracy(np.array(x_preds), np.array(x_gts), thresh) for x_preds in pred]
             my_accs = np.maximum(my_accs, accs)
             max_acc = np.max(accs) if len(accs) > 0 else 0.
             my_dist = [LaneEval.distances(np.array(x_preds), np.array(x_gts)) for x_preds in pred]
             if len(accs) > 0:
-                my_dists[np.argmax(accs)] = {
+                my_dists[np.argmax(accs)] = {       #此处有疑问？？？？？？？？？？？？
                     'y_gts': list(np.array(y_samples)[np.array(x_gts) >= 0].astype(int)),
                     'dists': list(my_dist[np.argmax(accs)])
                 }

@@ -3,7 +3,6 @@ import h5py
 import numpy as np
 
 from config import system_configs
-
 class BASE(object):
     def __init__(self):
         self._split = None

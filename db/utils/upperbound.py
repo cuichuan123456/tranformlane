@@ -6,7 +6,6 @@ from progressbar import progressbar
 
 from lib.config import Config
 from utils.evaluator import Evaluator
-
 warnings.simplefilter('ignore', np.RankWarning)
 
 

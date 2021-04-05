@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     threads = args.threads  # 4 every 4 epoch shuffle the indices
     print("using {} threads".format(threads))
-    training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]
+    training_dbs  = [datasets[dataset](configs["db"], train_split) for _ in range(threads)]  #很多类。。
     validation_db = datasets[dataset](configs["db"], val_split)
 
     # print("system config...")
